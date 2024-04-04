@@ -8,7 +8,7 @@ if (isset($_REQUEST['submit_insert'])) {
     if ($stmt->execute() === true) {
         echo "<p>Daten wurden gespeichert!</p>";
     } else {
-        echo "<p>Error: " . $stmt->error . "</p>";
+        echo "<p>Error: " . htmlspecialchars($stmt->error, ENT_QUOTES, 'UTF-8') . "</p>";
     }
     $stmt->close();
 }
@@ -31,13 +31,13 @@ if (isset($_REQUEST['submit_login'])) {
 $sql = "SELECT * FROM `user`";
 $result = database::dbConnection()->query($sql);
 $out = "";
+
 // Ausgabe
 while ($row = $result->fetch_assoc()) {
-    $out .= "ID: " . $row["id"] . " || Name: " . $row["name"] . "|| Passwort: " . $row["password"] . "<br>";
+    $out .= "ID: " . htmlspecialchars($row["id"], ENT_QUOTES, 'UTF-8') . " || Name: " . htmlspecialchars($row["name"], ENT_QUOTES, 'UTF-8') . "|| Passwort: " . htmlspecialchars($row["password"], ENT_QUOTES, 'UTF-8') . "<br>";
 }
 database::dbConnection()->close();
 ?>
-
 <html lang="de">
 
 <head>
@@ -45,7 +45,6 @@ database::dbConnection()->close();
 </head>
 
 <body>
-
     <h1>Test-Seite SQL Injections</h1>
     <h2>Insert</h2>
     <form action="frontend.php" method="get">
