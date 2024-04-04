@@ -6,15 +6,17 @@ class database
     private static $username = "root";
     private static $password = "";
     private static $dbname = "sql_injection";
+    private static $dbConnection = null;
 
     public static function dbConnection()
     {
-        // Create connection
-        $conn = new mysqli(self::$servername, self::$username, self::$password, self::$dbname);
-        // Check connection
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
+        if (self::$dbConnection === null) {
+            self::$dbConnection = new mysqli(self::$servername, self::$username, self::$password, self::$dbname);
+
+        } elseif (!self::$dbConnection->ping()) {
+            self::$dbConnection = new mysqli('localhost', 'username', 'password', 'database');
         }
-        return $conn;
+
+        return self::$dbConnection;
     }
 }
