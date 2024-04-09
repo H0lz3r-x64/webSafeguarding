@@ -2,13 +2,20 @@
 session_start();
 include "database.php";
 
+// check if user is logged in
 if (!isset($_SESSION['user'])) {
     header("Location: frontend.php");
     exit;
 }
 
-if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-    die('Invalid CSRF token');
+// CSRF protection on post request
+if ($_SESSION['post_data']) {
+    $_POST = $_SESSION['post_data'];
+    unset($_SESSION['post_data']);
+
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die('Invalid CSRF token');
+    }
 }
 
 $sql = "SELECT * FROM `user`";
