@@ -1,5 +1,15 @@
 <?php
+session_start();
 include "database.php";
+
+if (!isset($_SESSION['user'])) {
+    header("Location: frontend.php");
+    exit;
+}
+
+if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    die('Invalid CSRF token');
+}
 
 $sql = "SELECT * FROM `user`";
 $result = database::dbConnection()->query($sql);
