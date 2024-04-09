@@ -9,7 +9,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 // CSRF protection on post request
-if ($_SESSION['post_data']) {
+if (isset($_SESSION['post_data'])) {
     $_POST = $_SESSION['post_data'];
     unset($_SESSION['post_data']);
 
