@@ -7,6 +7,11 @@ ini_set('session.gc_maxlifetime', $time_in_seconds);
 
 session_start();
 
+// Generate CSRF token
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Check if session is expired
 if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $time_in_seconds)) {
     // last request was more than $time_in_seconds seconds ago
@@ -28,11 +33,6 @@ if (!isset($_SESSION['CREATED'])) {
 
 include 'database.php';
 
-// Generate CSRF token
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
 // Insert
 if (isset($_REQUEST['submit_insert'])) {
     // Check CSRF token
@@ -40,8 +40,11 @@ if (isset($_REQUEST['submit_insert'])) {
         die('Invalid CSRF token');
     }
 
+    // Hash the password with a random salt
+    $hashed_password = password_hash($_REQUEST['Passwort'], PASSWORD_DEFAULT);
+
     $stmt = database::dbConnection()->prepare("INSERT INTO user (name, password) VALUES (?, ?)");
-    $stmt->bind_param("ss", $_REQUEST['Name'], $_REQUEST['Passwort']);
+    $stmt->bind_param("ss", $_REQUEST['Name'], $hashed_password);
     if ($stmt->execute() === true) {
         echo "<p>Daten wurden gespeichert!</p>";
     } else {
@@ -57,16 +60,22 @@ if (isset($_REQUEST['submit_login'])) {
         die('Invalid CSRF token');
     }
 
-    $stmt = database::dbConnection()->prepare("SELECT * FROM `user` WHERE (password = ? AND name = ?)");
-    $stmt->bind_param("ss", $_REQUEST['Passwort'], $_REQUEST['Name']);
+    $stmt = database::dbConnection()->prepare("SELECT * FROM `user` WHERE name = ?");
+    $stmt->bind_param("s", $_REQUEST['Name']);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows) {
-        // Store user data in session
-        $_SESSION['user'] = $result->fetch_assoc();
-        // Store $_POST data in session
-        $_SESSION['post_data'] = $_POST;
-        header("Location: backend.php");
+        $user = $result->fetch_assoc();
+        // Verify the password
+        if (password_verify($_REQUEST['Passwort'], $user['password'])) {
+            // Store user data in session
+            $_SESSION['user'] = $user;
+            // Store $_POST data in session
+            $_SESSION['post_data'] = $_POST;
+            header("Location: backend.php");
+        } else {
+            echo "Passwort oder User-Name falsch";
+        }
     } else {
         echo "Passwort oder User-Name falsch";
     }
