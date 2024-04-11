@@ -7,7 +7,7 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 
     // last request was more than $time_in_seconds seconds ago
     session_unset();     // unset $_SESSION variable for the run-time 
     session_destroy();   // destroy session data in storage
-    header("Location: frontend.php");
+    header("Location: index.php");
     exit;
 }
 $_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
@@ -25,7 +25,7 @@ include "database.php";
 
 // check if user is logged in
 if (!isset($_SESSION['user'])) {
-    header("Location: frontend.php");
+    header("Location: index.php");
     exit;
 }
 

@@ -12,7 +12,7 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 
     // last request was more than $time_in_seconds seconds ago
     session_unset();     // unset $_SESSION variable for the run-time 
     session_destroy();   // destroy session data in storage
-    header("Location: frontend.php");
+    header("Location: index.php");
     exit;
 }
 $_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
@@ -93,7 +93,7 @@ database::dbConnection()->close();
 <body>
     <h1>Test-Seite Web Safeguarding</h1>
     <h2>Insert</h2>
-    <form action="frontend.php" method="post">
+    <form action="index.php" method="post">
         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
         <input type="text" name="Name" placeholder="Name" required><br>
         <input type="password" name="Passwort" placeholder="Passwort" required><br>
@@ -101,7 +101,7 @@ database::dbConnection()->close();
     </form>
     <hr>
     <h2>Login</h2>
-    <form action="frontend.php" method="post">
+    <form action="index.php" method="post">
         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
         <input type="text" name="Name" placeholder="Name" required><br>
         <input type="password" name="Passwort" placeholder="Passwort" required><br>
