@@ -40,6 +40,8 @@ if (isset($_REQUEST['submit_login'])) {
         $_SESSION['user'] = $result->fetch_assoc();
         // Store $_POST data in session
         $_SESSION['post_data'] = $_POST;
+        // Set a session variable to track login time
+        $_SESSION['login_time'] = time();
         header("Location: backend.php");
     } else {
         echo "Passwort oder User-Name falsch";

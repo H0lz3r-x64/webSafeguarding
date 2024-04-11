@@ -8,6 +8,16 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 
+// Check if session has expired
+$inactive = 10; // Set timeout period in seconds
+if (isset($_SESSION['login_time'])) {
+    $session_life = time() - $_SESSION['login_time'];
+    if ($session_life > $inactive) {
+        session_destroy();
+        header("Location: frontend.php");
+    }
+}
+
 // CSRF protection on post request
 if (isset($_SESSION['post_data'])) {
     $_POST = $_SESSION['post_data'];
