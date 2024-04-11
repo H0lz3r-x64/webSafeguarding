@@ -1,5 +1,26 @@
 <?php
 session_start();
+
+$time_in_seconds = 10;
+// Check if session is expired
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $time_in_seconds)) {
+    // last request was more than $time_in_seconds seconds ago
+    session_unset();     // unset $_SESSION variable for the run-time 
+    session_destroy();   // destroy session data in storage
+    header("Location: frontend.php");
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
+
+// Regenerate session ID if needed
+if (!isset($_SESSION['CREATED'])) {
+    $_SESSION['CREATED'] = time();
+} else if (time() - $_SESSION['CREATED'] > $time_in_seconds) {
+    // session started more than $time_in_seconds seconds ago
+    session_regenerate_id(true);    // change session ID for the current session and invalidate old session ID
+    $_SESSION['CREATED'] = time();  // update creation time
+}
+
 include "database.php";
 
 // check if user is logged in
@@ -8,15 +29,6 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 
-// Check if session has expired
-$inactive = 10; // Set timeout period in seconds
-if (isset($_SESSION['login_time'])) {
-    $session_life = time() - $_SESSION['login_time'];
-    if ($session_life > $inactive) {
-        session_destroy();
-        header("Location: frontend.php");
-    }
-}
 
 // CSRF protection on post request
 if (isset($_SESSION['post_data'])) {
@@ -40,7 +52,7 @@ database::dbConnection()->close();
 <html lang="de">
 
 <head>
-    <title>SQL-Injections BACKEND</title>
+    <title>Web Safeguarding BACKEND</title>
 </head>
 
 <body>

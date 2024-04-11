@@ -1,5 +1,31 @@
 <?php
+$time_in_seconds = 10;
+// Set session cookie lifetime
+ini_set('session.cookie_lifetime', $time_in_seconds);
+// Set session garbage collection time
+ini_set('session.gc_maxlifetime', $time_in_seconds);
+
 session_start();
+
+// Check if session is expired
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > $time_in_seconds)) {
+    // last request was more than $time_in_seconds seconds ago
+    session_unset();     // unset $_SESSION variable for the run-time 
+    session_destroy();   // destroy session data in storage
+    header("Location: frontend.php");
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time(); // update last activity time stamp
+
+// Regenerate session ID if needed
+if (!isset($_SESSION['CREATED'])) {
+    $_SESSION['CREATED'] = time();
+} else if (time() - $_SESSION['CREATED'] > $time_in_seconds) {
+    // session started more than $time_in_seconds seconds ago
+    session_regenerate_id(true);    // change session ID for the current session and invalidate old session ID
+    $_SESSION['CREATED'] = time();  // update creation time
+}
+
 include 'database.php';
 
 // Generate CSRF token
@@ -40,8 +66,6 @@ if (isset($_REQUEST['submit_login'])) {
         $_SESSION['user'] = $result->fetch_assoc();
         // Store $_POST data in session
         $_SESSION['post_data'] = $_POST;
-        // Set a session variable to track login time
-        $_SESSION['login_time'] = time();
         header("Location: backend.php");
     } else {
         echo "Passwort oder User-Name falsch";
@@ -63,11 +87,11 @@ database::dbConnection()->close();
 <html lang="de">
 
 <head>
-    <title>SQL-Injections</title>
+    <title>Web Safeguarding</title>
 </head>
 
 <body>
-    <h1>Test-Seite SQL Injections</h1>
+    <h1>Test-Seite Web Safeguarding</h1>
     <h2>Insert</h2>
     <form action="frontend.php" method="post">
         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
